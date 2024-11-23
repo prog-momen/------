@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anonymous Chat</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+    .container { max-width: 400px; margin: 50px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+    h2, h3 { text-align: center; }
+    .input-group { margin-bottom: 15px; }
+    .input-group label { display: block; margin-bottom: 5px; }
+    .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background-color: #0056b3; }
+    #chat-window { margin-top: 20px; border: 1px solid #ccc; padding: 10px; height: 200px; overflow-y: auto; }
+    #message-form { display: flex; margin-top: 10px; }
+    #message-form input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-right: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Anonymous Chat</h2>
+    <div id="login">
+      <button onclick="startChat('User 1')">Login as Anonymous User 1</button>
+      <button onclick="startChat('User 2')" style="margin-top: 10px;">Login as Anonymous User 2</button>
+    </div>
+    <div id="chat" style="display: none;">
+      <h3>Welcome, <span id="user-display"></span></h3>
+      <div id="chat-window"></div>
+      <form id="message-form" onsubmit="sendMessage(event)">
+        <input type="text" id="message-input" placeholder="Type your message">
+        <button type="submit">Send</button>
+      </form>
+    </div>
+  </div>
+  <script>
+    const localStorageKey = 'anonymousChatMessages'; // Key for storing chat messages
+    let currentUser = null;
+
+    // Start Chat as Anonymous User
+    function startChat(userRole) {
+      currentUser = userRole;
+      document.getElementById('login').style.display = 'none';
+      document.getElementById('chat').style.display = 'block';
+      document.getElementById('user-display').textContent = currentUser;
+      loadMessages();
+    }
+
+    // Load Messages from Local Storage
+    function loadMessages() {
+      const chatWindow = document.getElementById('chat-window');
+      chatWindow.innerHTML = '';
+      const messages = JSON.parse(localStorage.getItem(localStorageKey)) || [];
+      messages.forEach(msg => {
+        const messageElement = document.createElement('p');
+        messageElement.textContent = `${msg.sender}: ${msg.text}`;
+        chatWindow.appendChild(messageElement);
+      });
+      chatWindow.scrollTop = chatWindow.scrollHeight; // Scroll to the bottom
+    }
+
+    // Send Message
+    function sendMessage(event) {
+      event.preventDefault();
+      const messageInput = document.getElementById('message-input');
+      const messageText = messageInput.value.trim();
+      if (!messageText) return;
+
+      // Save message to local storage
+      const messages = JSON.parse(localStorage.getItem(localStorageKey)) || [];
+      messages.push({ sender: currentUser, text: messageText });
+      localStorage.setItem(localStorageKey, JSON.stringify(messages));
+
+      messageInput.value = ''; // Clear input field
+      loadMessages(); // Refresh chat
+    }
+  </script>
+</body>
+</html>
